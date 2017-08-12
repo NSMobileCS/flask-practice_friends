@@ -1,0 +1,93 @@
+<ERROR 1>
+        config = {
+                'host': 'localhost',
+                'database': db,
+                'user': 'root',    
+                'password': 'root',
+                'port': '3306' # change the port to match the port your SQL server is running on
+        }
+
+## RESULTS IN ERROR:
+sqlalchemy.exc.OperationalError
+OperationalError: (_mysql_exceptions.OperationalError) (1045, "Access denied for user 'route'@'localhost' (using password: YES)")
+</ERROR 1>
+<ERROR 2>
+    def __init__(self, app, db):
+        config = {
+                'host': 'locahost', #spelling error --> same problem?
+                'database': db, # we got db as an argument
+                'user': 'root',
+                'password': 'root',
+                'port': '3306' # change the port to match the port your SQL server is running on
+
+#this one actually gave me no problem immediately on page refresh, because it doesn't trigger a new connection.
+#I ctrl+C stopped python instance & restarted it
+#i got:
+error: [Errno 98] Address already in use
+(py27flask-env) nrs@linux-8bnu:~/Dojo/flask_db/friend
+#it doesn't seem like the right error.
+#to narrow down the problem, i changed the port from 8000 to 8123
+#neither localhost:8000 nor localhost:8123 serve anything....
+#...until i run python server.py & localhost:8123 comes right on
+#it displays the data w/out error. right there on localhost.
+#so i tested the following, figuring it would work because ctrl+F didn't find 'host' any other lines of mysqlconnection.py:
+    def __init__(self, app, db):
+        config = {
+                #NO HOST SPECIFIED WHATSOEVER! BET IT DEFAULTS TO LOCALHOST?
+                'database': db, # we got db as an argument
+                'user': 'root',
+                'password': 'root',
+                'port': '3306' # change the port to match the port your SQL server is running on
+        }
+#still works. that line can safely be factored out.
+</ERROR 2>
+<ERROR 3>
+class MySQLConnection(object):
+    def __init__(self, app, db):
+        config = {
+            #now I changed the code to actually use the config['host'] value 
+            #but 'forgotten' to put host back in here
+            'database': db, # we got db as an argument
+            'user': 'root',
+            'password': 'root',
+            'port': '3306',
+            }
+        # this will use the above values to generate the path to connect to your sql database
+        DATABASE_URI = "mysql://{}:{}@{}:{}/{}".format(config['user'], 
+                                                        config['password'], 
+                                                        config['host'],
+                                                        config['port'],
+                                                        config['database'])
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+OUTPUT:         
+/home/nrs/Dojo/flask_db/friends1/mysqlconnection.py in __init__(self, app, db)
+     16         DATABASE_URI = "mysql://{}:{}@{}:{}/{}".format(config['user'], 
+     17                                                         config['password'],
+---> 18                                                         config['host'],
+     19                                                         config['port'],
+     20                                                         config['database'])
+
+KeyError: 'host'
+
+REFACTORED TO:
+class MySQLConnection(object):
+    def __init__(self, app, db):
+        config = {
+            'host': 'localhost',
+            'database': db, # we got db as an argument
+            'user': 'root',
+            'password': 'root',
+            'port': '3306',
+            }
+        # this will use the above values to generate the path to connect to your sql database
+        DATABASE_URI = "mysql://{}:{}@{}:{}/{}".format(config['user'], 
+                                                        config['password'], 
+                                                        config['host'],
+                                                        config['port'],
+                                                        config['database'])
+        app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+        # establish the connection to database
+        self.db = SQLAlchemy(app)
+#this works.
+</ERROR 3>
