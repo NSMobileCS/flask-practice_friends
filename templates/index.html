@@ -4,20 +4,58 @@
         <title></title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="css/style.css" rel="stylesheet">
+        <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     </head>
-    <body>
-    {{ all_friends }}
-<h1>These are all my friends!</h1>
-<!-- with all the data we can then construct a more structured output -->
-{% for friend in all_friends: %}
-   <p>ID: {{ friend['id'] }}</p>
-   <p>First Name: {{ friend['first_name'] }}</p>
-   <p>Last Name: {{ friend['last_name'] }}</p>
-   <p>Occupation: {{ friend['occupation'] }}</p>
-   <hr>
-{% endfor %}
-Copy
+<body>
+    <!-- {{ all_friends }} -->
+    <table>
+        <h2>These are all my friends!</h2>
+        <tr>
+            <th>ID: </th>
+            <th>First Name: </th>
+            <th>Last Name: </th>
+            <th>Occupation: </th>
+        </tr>
+        {% for friend in all_friends: %}
+        <tr>
+            <td>{{ friend['id'] }}</td>
+            <td>{{ friend['first_name'] }}</td>
+            <td>{{ friend['last_name'] }}</td>
+            <td>{{ friend['occupation'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
-    </body>
+    <h3>Add new friend</h3>
+    <form method='POST' action='/friends' id='addviewfriendform'>
+        <table name='addform'>
+            <tr>
+                <td>
+                    First Name: 
+                </td>
+                <td>
+                    <input type='text' name='first_name' size=28>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Last Name:
+                </td>
+                <td>
+                    <input type='text' name='last_name' size=28>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Occupation:
+                </td>
+                <td>
+                    <input type="text" name='occupation' size=28>
+                </td>
+            </tr>
+        </table>
+        <input type="submit" value="Add this friend" class='btn'>
+    </form>
+
+</body>
 </html>
